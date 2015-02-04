@@ -17,14 +17,17 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-	Uri imageFileUri;
-
+	private Uri imageFileUri;
+	private TextView tv;
+	private ImageButton button;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		ImageButton button = (ImageButton) findViewById(R.id.TakeAPhoto);
+		tv =  (TextView) findViewById(R.id.status);
+		button = (ImageButton) findViewById(R.id.TakeAPhoto);
 		OnClickListener listener = new OnClickListener() {
 			public void onClick(View v) {
 				takeAPhoto();
@@ -58,23 +61,41 @@ public class MainActivity extends Activity {
 		if (!folderF.exists()) {
 			folderF.mkdir();
 		}
+		
+		//added for lab 5
+		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		
 
 		// Create an URI for the picture file
 		String imageFilePath = folder + "/"
 				+ String.valueOf(System.currentTimeMillis()) + ".jpg";
 		File imageFile = new File(imageFilePath);
 		imageFileUri = Uri.fromFile(imageFile);
-
+		
 		// TODO: Put in the intent in the tag MediaStore.EXTRA_OUTPUT the URI
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, imageFileUri);
 		
 		// TODO: Start the activity (expecting a result), with the code
-		// CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE
-		
+		// CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE		
+		startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO: Handle the results from CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE
-		
+		if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+			if (resultCode == RESULT_OK) {
+				tv.setText("Result is OK!");
+				button.setImageDrawable(Drawable.createFromPath(imageFileUri.getPath()));
+				
+				
+				
+			} else if (resultCode == RESULT_CANCELED) {
+				tv.setText("Result: Canceled"); 
+			} else {
+				tv.setText("Something Else");
+				
+			}
+		}
 		// TODO: Handle the cases for RESULT_OK, RESULT_CANCELLED, and others
 		
 		// When the result is OK, set text "Photo OK!" in the status
